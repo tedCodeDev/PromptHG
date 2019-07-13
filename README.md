@@ -1,5 +1,5 @@
 # PromptHG
-# Copyright 2019 Theodore J. Mike
+## Copyright 2019 Theodore J. Mike
 
 Displays basic Mercurial info in the PowerShell prompt.
 
