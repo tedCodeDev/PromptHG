@@ -74,17 +74,7 @@ function Get-HG-Branch
 function Get-HG-Num-Changes
 {
     $status = hg status
-    $status = $status -Split " "
-
-    $counter = 0
-    foreach($st in $status)
-    {
-        if ($st.Length -gt 1)
-        {
-            $counter++
-        }
-    }
-    return $counter
+    return $status.Count;
 }
 
 function Show-PromptHG
