@@ -37,7 +37,6 @@ $global:promptConfig = [PSCustomObject]@{
     ShowPromptBranch            = $true
     ShowPromptNumChanges        = $true
     ShowPromptParent            = $true
-    SimplePromptParent          = $true
     
     # Separators
     HgInfoStart                 = "["
@@ -108,17 +107,6 @@ function Show-PromptHG
         if($promptConfig.ShowPromptParent) {
             Write-Host -NoNewline " "
             $parent = $(Get-HG-Parent)
-            $isTip = $parent.Contains(" tip")
-
-            if($promptConfig.SimplePromptParent){
-                if($isTip){
-                    $parent = "tip"
-                }
-                else {
-                    $parent = "previous"
-                }
-            }
-
             
             if($isTip){
                 $parentColor = $promptConfig.ParentColorTip
