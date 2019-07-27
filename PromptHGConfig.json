@@ -7,8 +7,8 @@
         "PromptPS":              true,
         "PromptLocation":        true,
         "PromptBranch":          true,
-        "PromptNumChanges":      true,
-        "PromptParent":          true
+        "PromptParent":          true,
+        "PromptNumChanges":      true        
     },
 
     "Symbol": {        
