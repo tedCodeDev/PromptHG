@@ -50,12 +50,12 @@ $global:promptConfig = [PSCustomObject]@{
     LocationColor               = "White"
     HgInfoSeparatorColor        = "Green"
     BranchColor                 = "Cyan"
-    ParentColorTip              = "Green"
-    ParentColorNotTip           = "Red"
+    ParentColor                 = "Green"
     NumChangesSeparatorColor    = "Yellow"
     NumChangesColor             = "Yellow"        
     PromptEndColor              = "White"   
 }
+
 
 function Get-HG-Parent
 {
@@ -107,15 +107,8 @@ function Show-PromptHG
         if($promptConfig.ShowPromptParent) {
             Write-Host -NoNewline " "
             $parent = $(Get-HG-Parent)
-            
-            if($isTip){
-                $parentColor = $promptConfig.ParentColorTip
-            }
-            else {
-                $parentColor = $promptConfig.ParentColorNotTip
-            }
 
-            Write-Host -NoNewline $parent -ForegroundColor $parentColor
+            Write-Host -NoNewline $parent -ForegroundColor $promptConfig.ParentColor
         }
 
         # HG Info - Number of Changes
@@ -159,8 +152,7 @@ function Show-PromptHG
  
     # Prompt - End
     Write-Host -NoNewline $promptConfig.PromptEnd -ForegroundColor $promptConfig.PromptEndColor
-    Write-Host -NoNewline " "
-
+    
     # Title - Show
     if ($promptConfig.ShowTitle){
         $host.ui.rawui.WindowTitle = $title        
