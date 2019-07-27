@@ -89,7 +89,9 @@ function Show-PromptHG
 
         # HG Info - Parent
         if($promptConfig.Show.PromptParent) {
-            Write-Host -NoNewline " "
+            if($promptConfig.Show.PromptBranch){
+                Write-Host -NoNewline " "
+            }            
             $parent = $(Get-HG-Parent)
 
             Write-Host -NoNewline $parent -ForegroundColor $promptConfig.Color.Parent
@@ -99,7 +101,9 @@ function Show-PromptHG
         $numChanges = $(Get-HG-Num-Changes)
         if($promptConfig.Show.PromptNumChanges) {
             if($numChanges -gt 0){
-                Write-Host -NoNewline " "
+                if($promptConfig.Show.PromptBranch -or $promptConfig.Show.PromptParent){
+                    Write-Host -NoNewline " "
+                }
                 Write-Host -NoNewline $promptConfig.Symbol.NumChangesStart -ForegroundColor $promptConfig.Color.NumChangesSeparator
                 Write-Host -NoNewline $numChanges -ForegroundColor $promptConfig.Color.NumChanges
                 Write-Host -NoNewline $promptConfig.Symbol.NumChangesEnd -ForegroundColor $promptConfig.Color.NumChangesSeparator
