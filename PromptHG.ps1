@@ -24,37 +24,9 @@
 
 
 # Settings
-$global:promptConfig = [PSCustomObject]@{
-    # Title Settings
-    ShowTitle                   = $true
-    ShowTitleLocation           = $true
-    ShowTitleBranch             = $true
-    ShowTitleChanges            = $true
-    TitleChangesIndicator       = "*"
-
-    # Prompt Display Settings
-    ShowPromptLocation          = $true
-    ShowPromptBranch            = $true
-    ShowPromptNumChanges        = $true
-    ShowPromptParent            = $true
-    
-    # Separators
-    HgInfoStart                 = "["
-    HgInfoEnd                   = "]"
-    NumChangesStart             = "("
-    NumChangesEnd               = ")"
-    PromptEnd                   = ">"    
-    
-    # Prompt Colors
-    PSColor                     = "White"
-    LocationColor               = "White"
-    HgInfoSeparatorColor        = "Green"
-    BranchColor                 = "Cyan"
-    ParentColor                 = "Green"
-    NumChangesSeparatorColor    = "Yellow"
-    NumChangesColor             = "Yellow"        
-    PromptEndColor              = "White"   
-}
+$configFileName = "PromptHGConfig.json"
+$configFilePath = $PROFILE.Substring(0, $PROFILE.LastIndexOf("\")) + "\$configFileName"  
+$global:promptConfig = Get-Content -Raw -Path $configFilePath | ConvertFrom-Json
 
 
 function Get-HG-Parent
@@ -84,65 +56,65 @@ function Show-PromptHG
     $numChanges = 0
 
     # Prompt - Start
-    Write-Host -NoNewline "PS" -ForegroundColor $promptConfig.PSColor
+    Write-Host -NoNewline "PS" -ForegroundColor $promptConfig.Color.PS
 
     # Prompt - Location
-    if ($promptConfig.ShowPromptLocation) {
+    if ($promptConfig.Show.PromptLocation) {
         Write-Host -NoNewline " "
-        Write-Host -NoNewline $location -ForegroundColor $promptConfig.LocationColor
+        Write-Host -NoNewline $location -ForegroundColor $promptConfig.Color.Location
     }
 
     # Prompt - HG Info    
     if(-not $branch -eq ""){
         # HG Info - Start
         Write-Host -NoNewline " "
-        Write-Host -NoNewline $promptConfig.HgInfoStart -ForegroundColor $promptConfig.HgInfoSeparatorColor
+        Write-Host -NoNewline $promptConfig.Symbol.HgInfoStart -ForegroundColor $promptConfig.Color.HgInfoSeparator
 
         # HG Info -  Branch
-        if($promptConfig.ShowPromptBranch) {            
-            Write-Host -NoNewline $Branch -ForegroundColor $promptConfig.BranchColor
+        if($promptConfig.Show.PromptBranch) {            
+            Write-Host -NoNewline $Branch -ForegroundColor $promptConfig.Color.Branch
         }
 
         # HG Info - Parent
-        if($promptConfig.ShowPromptParent) {
+        if($promptConfig.Show.PromptParent) {
             Write-Host -NoNewline " "
             $parent = $(Get-HG-Parent)
 
-            Write-Host -NoNewline $parent -ForegroundColor $promptConfig.ParentColor
+            Write-Host -NoNewline $parent -ForegroundColor $promptConfig.Color.Parent
         }
 
         # HG Info - Number of Changes
         $numChanges = $(Get-HG-Num-Changes)
-        if($promptConfig.ShowPromptNumChanges) {
+        if($promptConfig.Show.PromptNumChanges) {
             if($numChanges -gt 0){
                 Write-Host -NoNewline " "
-                Write-Host -NoNewline $promptConfig.NumChangesStart -ForegroundColor $promptConfig.NumChangesSeparatorColor
-                Write-Host -NoNewline $numChanges -ForegroundColor $promptConfig.NumChangesColor
-                Write-Host -NoNewline $promptConfig.NumChangesEnd -ForegroundColor $promptConfig.NumChangesSeparatorColor
+                Write-Host -NoNewline $promptConfig.Symbol.NumChangesStart -ForegroundColor $promptConfig.Color.NumChangesSeparator
+                Write-Host -NoNewline $numChanges -ForegroundColor $promptConfig.Color.NumChanges
+                Write-Host -NoNewline $promptConfig.Symbol.NumChangesEnd -ForegroundColor $promptConfig.Color.NumChangesSeparator
             }            
         }
 
         # HG Info - End
-        Write-Host -NoNewline $promptConfig.HgInfoEnd -ForegroundColor $promptConfig.HgInfoSeparatorColor
+        Write-Host -NoNewline $promptConfig.Symbol.HgInfoEnd -ForegroundColor $promptConfig.Color.HgInfoSeparator
         Write-Host -NoNewline " "
 
         # Setup Title - HG Info
-        if ($promptConfig.ShowTitle){
-            if($promptConfig.ShowTitleBranch)
+        if ($promptConfig.Show.Title){
+            if($promptConfig.Show.TitleBranch)
             {
                 $title += $branch
             }
-            if ($promptConfig.ShowTitleChanges)
+            if ($promptConfig.Show.TitleChanges)
             {
                 if($numChanges -gt 0){
-                   $title += $promptConfig.TitleChangesIndicator
+                   $title += $promptConfig.Symbol.TitleChanges
                 }
             }
         }
     }
 
     # Setup Title - Location
-    if ($promptConfig.ShowTitle -and $promptConfig.ShowTitleLocation) {
+    if ($promptConfig.Show.Title -and $promptConfig.Show.TitleLocation) {
         if(-not $title.Length -eq 0)
         {
             $title += " - "
@@ -151,10 +123,10 @@ function Show-PromptHG
     }
  
     # Prompt - End
-    Write-Host -NoNewline $promptConfig.PromptEnd -ForegroundColor $promptConfig.PromptEndColor
+    Write-Host -NoNewline $promptConfig.Symbol.PromptEnd -ForegroundColor $promptConfig.Color.PromptEnd
     
     # Title - Show
-    if ($promptConfig.ShowTitle){
+    if ($promptConfig.Show.Title){
         $host.ui.rawui.WindowTitle = $title        
     }
     return " "    

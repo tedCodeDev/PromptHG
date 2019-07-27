@@ -1,0 +1,32 @@
+{
+    "Show": {
+        "Title":                 true,
+        "TitleLocation":         true,
+        "TitleBranch":           true,
+        "TitleChanges":          true,
+        "PromptLocation":        true,
+        "PromptBranch":          true,
+        "PromptNumChanges":      true,
+        "PromptParent":          true
+    },
+
+    "Symbol": {        
+        "HgInfoStart":           "[",
+        "HgInfoEnd":             "]",
+        "NumChangesStart":       "(",
+        "NumChangesEnd":         ")",
+        "PromptEnd":             ">",
+        "TitleChanges":          "*"
+    },
+    
+    "Color": {
+        "PS":                    "White",
+        "Location":              "White",
+        "HgInfoSeparator":       "Magenta",
+        "Branch":                "Cyan",
+        "Parent":                "Green",
+        "NumChangesSeparator":   "Yellow",
+        "NumChanges":            "Yellow",
+        "PromptEnd":             "White"
+    }
+}
