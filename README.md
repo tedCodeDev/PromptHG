@@ -32,6 +32,7 @@ Several aspects of the prompt can be easily adjusted to meet your individual pre
 |            | TitleBranch         | Show the current branch in the title bar                                                                  |
 |            | TitleLocation       | Show the current path in the title bar                                                                    |
 |            | TitleChanges        | Show a symbol indicating uncommitted local changes in the title bar                                       |
+|            | PromptPS            | Show "PS" at the beginning of the PowerShell prompt                                                       |
 |            | PromptLocation      | Show the current path in the PowerShell prompt                                                            |
 |            | PromptBranch        | Show the current branch in the PowerShell prompt                                                          |
 |            | PromptNumChanges    | Show the number of uncommitted local changes in the PowerShell prompt                                     |

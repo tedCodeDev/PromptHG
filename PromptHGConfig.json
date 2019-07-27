@@ -1,9 +1,10 @@
 {
     "Show": {
         "Title":                 true,
-        "TitleLocation":         true,
         "TitleBranch":           true,
+        "TitleLocation":         true,        
         "TitleChanges":          true,
+        "PromptPS":              true,
         "PromptLocation":        true,
         "PromptBranch":          true,
         "PromptNumChanges":      true,

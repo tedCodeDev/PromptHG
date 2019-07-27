@@ -38,14 +38,24 @@ function Get-HG-Parent
 
 function Get-HG-Branch
 {
-    $branch = hg branch
-    return $branch.Trim()
+    try {
+        $branch = hg branch
+        return $branch.Trim()    
+    }
+    catch {
+        return ""
+    }    
 }
 
 function Get-HG-Num-Changes
 {
-    $status = hg status
-    return $status.Count;
+    try {
+        $status = hg status
+        return $status.Count;    
+    }
+    catch {
+        return -1
+    }    
 }
 
 function Show-PromptHG
@@ -56,7 +66,9 @@ function Show-PromptHG
     $numChanges = 0
 
     # Prompt - Start
-    Write-Host -NoNewline "PS" -ForegroundColor $promptConfig.Color.PS
+    if ($promptConfig.Show.PromptPS) {
+        Write-Host -NoNewline "PS" -ForegroundColor $promptConfig.Color.PS
+    }
 
     # Prompt - Location
     if ($promptConfig.Show.PromptLocation) {
