@@ -12,11 +12,13 @@ For license terms, please see License.md.
 
 ## Installation
 
-To install, you need to add PromptHG.ps1 to your PowerShell profile and place the config file in the same folder as your PowerShell profile.
+To install, add PromptHG.ps1 to your PowerShell profile and place the config file in the same folder as your PowerShell profile.
 
 **For Example:**
 
-1. Edit C:\Users\<UserName>\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1 to contain the following: . '<PathToScript>\PromptHG.ps1'
+1. Edit: C:\Users\<UserName>\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1 to contain the following: 
+    * . '<PathToScript>\PromptHG.ps1'
+
 2. Copy PromptHGConfig.json to C:\Users\<UserName>\Documents\WindowsPowerShell\
 
 
@@ -35,8 +37,8 @@ Several aspects of the prompt can be easily adjusted to meet your individual pre
 |            | PromptPS            | Show "PS" at the beginning of the PowerShell prompt                                                       |
 |            | PromptLocation      | Show the current path in the PowerShell prompt                                                            |
 |            | PromptBranch        | Show the current branch in the PowerShell prompt                                                          |
-|            | PromptNumChanges    | Show the number of uncommitted local changes in the PowerShell prompt                                     |
 |            | PromptParent        | Show the parent branch info in the PowerShell prompt                                                      |
+|            | PromptNumChanges    | Show the number of uncommitted local changes in the PowerShell prompt                                     |
 | **Symbol** |                     |                                                                                                           |
 |            | HgInfoStart         | The symbol to show in the PowerShell prompt before any Mercurial info                                     |
 |            | HgInfoEnd           | The symbol to show in the PowerShell prompt after any Mercurial info                                      |
