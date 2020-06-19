@@ -25,79 +25,181 @@
 
 # Settings
 $configFileName = "PromptHGConfig.json"
-$configFilePath = $PROFILE.Substring(0, $PROFILE.LastIndexOf("\")) + "\$configFileName"  
+$configFilePath = $PROFILE.Substring(0, $PROFILE.LastIndexOf("\")) + "\$configFileName"
 $global:promptConfig = Get-Content -Raw -Path $configFilePath | ConvertFrom-Json
 
+Add-Type -TypeDefinition @"
+    public enum VersionControlType
+    {
+        None,
+        Hg,
+        Git
+    }
+"@
 
-function Get-HG-Parent
+
+function Get-Is-HG
 {
-    $summary = hg summary
-    $parent = $summary[0].Replace("parent: ", "").Trim();
-    return $parent
+    $branch = $(Get-HG-Branch)
+    return ((-not $branch.Contains("abort:")) -and (-not $branch -eq ""))
+}
+
+function Get-Is-Git
+{
+    $branch = $(Get-Git-Branch)
+    return ((-not $branch.Contains("fatal:")) -and (-not $branch -eq ""))
+}
+
+function Get-Version-Control-System{
+    [VersionControlType]$versionControlSystem=[VersionControlType]::None
+    if($(Get-Is-HG))
+    {
+        $versionControlSystem=[VersionControlType]::Hg
+    }
+    elseif($(Get-Is-Git))
+    {
+        $versionControlSystem=[VersionControlType]::Git
+    }
+
+    return $versionControlSystem
 }
 
 function Get-HG-Branch
 {
-    try {
+    try
+    {
         $branch = hg branch
-        return $branch.Trim()    
+        return $branch.Trim()
     }
-    catch {
+    catch
+    {
         return ""
-    }    
+    }
 }
+
+function Get-Git-Branch
+{
+    try
+    {
+        $branch = git rev-parse --abbrev-ref HEAD
+        return $branch.Trim()
+    }
+    catch
+    {
+        return ""
+    }
+}
+
+function Get-Branch([VersionControlType]$versionControlType)
+{
+    switch($versionControlType)
+    {
+        "None" {return ""}
+        "Hg"   {return $(Get-HG-Branch)}
+        "Git"  {return $(Get-Git-Branch)}
+    }
+}
+
+function Get-HG-Parent
+{
+    $summary = hg summary
+    $parent = $summary[0].Replace("parent: ", "").Trim()
+    return $parent
+}
+
+function Get-Git-Parent
+{
+    $head = git rev-parse --short HEAD
+
+    # https://stackoverflow.com/questions/17322876/how-to-tell-if-your-head-is-detached-in-git
+    return $head
+    #TODO
+
+    # $summary = hg summary
+    # $parent = $summary[0].Replace("parent: ", "").Trim()
+    # return $parent
+}
+
+function Get-Parent([VersionControlType]$versionControlType)
+{
+    switch($versionControlType)
+    {
+        "None" {return ""}
+        "Hg"   {return $(Get-HG-Parent)}
+        "Git"  {return $(Get-Git-Parent)}
+    }
+}
+
+
 
 function Get-HG-Num-Changes
 {
     try {
         $status = hg status
-        return $status.Count;    
+        return $status.Count
     }
     catch {
         return -1
-    }    
+    }
 }
+
+
 
 function Show-PromptHG
 {
-    $title = ""   
-    $location = $(Get-Location)
-    $branch = $(Get-HG-Branch)
+    $versionControlSystem = Get-Version-Control-System
+
+    $title = ""
+    $location = Get-Location
+    # switch($versionControlType){
+    #     "None" {$branch = ""; continue}
+    #     "Hg" {$branch = $(Get-HG-Branch); continue}
+    #     "Git" {$branch = $(Get-Git-Branch); continue}
+    # }
+
+    $branch = Get-Branch($versionControlSystem)
+
     $numChanges = 0
 
     # Prompt - Start
-    if ($promptConfig.Show.PromptPS) {
+    if ($promptConfig.Show.PromptPS)
+    {
         Write-Host -NoNewline "PS" -ForegroundColor $promptConfig.Color.PS
     }
 
     # Prompt - Location
-    if ($promptConfig.Show.PromptLocation) {
+    if ($promptConfig.Show.PromptLocation)
+    {
         Write-Host -NoNewline " "
         Write-Host -NoNewline $location -ForegroundColor $promptConfig.Color.Location
     }
 
-    # Prompt - HG Info    
-    if(-not $branch -eq ""){
-        # HG Info - Start
+    # Prompt - Info
+    if(-not $branch -eq "")
+    {
+        # Info - Start
         Write-Host -NoNewline " "
-        Write-Host -NoNewline $promptConfig.Symbol.HgInfoStart -ForegroundColor $promptConfig.Color.HgInfoSeparator
+        Write-Host -NoNewline $promptConfig.Symbol.InfoStart -ForegroundColor $promptConfig.Color.InfoSeparator
 
-        # HG Info -  Branch
-        if($promptConfig.Show.PromptBranch) {            
-            Write-Host -NoNewline $Branch -ForegroundColor $promptConfig.Color.Branch
+        # Info -  Branch
+        if($promptConfig.Show.PromptBranch)
+        {
+            Write-Host -NoNewline $branch -ForegroundColor $promptConfig.Color.Branch
         }
 
-        # HG Info - Parent
-        if($promptConfig.Show.PromptParent) {
-            if($promptConfig.Show.PromptBranch){
+        # Info - Parent
+        if($promptConfig.Show.PromptParent)
+        {
+            if($promptConfig.Show.PromptBranch)
+            {
                 Write-Host -NoNewline " "
-            }            
-            $parent = $(Get-HG-Parent)
+            }
+            $parent = Get-Parent($versionControlSystem)
 
             Write-Host -NoNewline $parent -ForegroundColor $promptConfig.Color.Parent
         }
 
-        # HG Info - Number of Changes
+        # Info - Number of Changes
         $numChanges = $(Get-HG-Num-Changes)
         if($promptConfig.Show.PromptNumChanges) {
             if($numChanges -gt 0){
@@ -107,14 +209,14 @@ function Show-PromptHG
                 Write-Host -NoNewline $promptConfig.Symbol.NumChangesStart -ForegroundColor $promptConfig.Color.NumChangesSeparator
                 Write-Host -NoNewline $numChanges -ForegroundColor $promptConfig.Color.NumChanges
                 Write-Host -NoNewline $promptConfig.Symbol.NumChangesEnd -ForegroundColor $promptConfig.Color.NumChangesSeparator
-            }            
+            }
         }
 
-        # HG Info - End
-        Write-Host -NoNewline $promptConfig.Symbol.HgInfoEnd -ForegroundColor $promptConfig.Color.HgInfoSeparator
+        # Info - End
+        Write-Host -NoNewline $promptConfig.Symbol.InfoEnd -ForegroundColor $promptConfig.Color.InfoSeparator
         Write-Host -NoNewline " "
 
-        # Setup Title - HG Info
+        # Setup Title - Info
         if ($promptConfig.Show.Title){
             if($promptConfig.Show.TitleBranch)
             {
@@ -137,15 +239,15 @@ function Show-PromptHG
         }
         $title += $location
     }
- 
+
     # Prompt - End
     Write-Host -NoNewline $promptConfig.Symbol.PromptEnd -ForegroundColor $promptConfig.Color.PromptEnd
-    
+
     # Title - Show
     if ($promptConfig.Show.Title){
-        $host.ui.rawui.WindowTitle = $title        
+        $host.ui.rawui.WindowTitle = $title
     }
-    return " "    
+    return " "
 }
 
 # Replace the prompt
