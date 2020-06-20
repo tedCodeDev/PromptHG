@@ -12,8 +12,8 @@
     },
 
     "Symbol": {
-        "InfoStart":           "[",
-        "InfoEnd":             "]",
+        "InfoStart":             "[",
+        "InfoEnd":               "]",
         "NumChangesStart":       "(",
         "NumChangesEnd":         ")",
         "PromptEnd":             ">",
@@ -23,7 +23,7 @@
     "Color": {
         "PS":                    "White",
         "Location":              "White",
-        "InfoSeparator":       "Magenta",
+        "InfoSeparator":         "Magenta",
         "Branch":                "Cyan",
         "Parent":                "Green",
         "NumChangesSeparator":   "Yellow",

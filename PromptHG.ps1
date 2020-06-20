@@ -29,7 +29,7 @@ $configFilePath = $PROFILE.Substring(0, $PROFILE.LastIndexOf("\")) + "\$configFi
 $global:promptConfig = Get-Content -Raw -Path $configFilePath | ConvertFrom-Json
 
 Add-Type -TypeDefinition @"
-    public enum VersionControlType
+    public enum VersionControlSystem
     {
         None,
         Hg,
@@ -40,25 +40,25 @@ Add-Type -TypeDefinition @"
 
 function Get-Is-HG
 {
-    $branch = $(Get-HG-Branch)
+    $branch = Get-HG-Branch
     return ((-not $branch.Contains("abort:")) -and (-not $branch -eq ""))
 }
 
 function Get-Is-Git
 {
-    $branch = $(Get-Git-Branch)
+    $branch = Get-Git-Branch
     return ((-not $branch.Contains("fatal:")) -and (-not $branch -eq ""))
 }
 
 function Get-Version-Control-System{
-    [VersionControlType]$versionControlSystem=[VersionControlType]::None
-    if($(Get-Is-HG))
+    [VersionControlSystem]$versionControlSystem=[VersionControlSystem]::None
+    if(Get-Is-HG)
     {
-        $versionControlSystem=[VersionControlType]::Hg
+        $versionControlSystem=[VersionControlSystem]::Hg
     }
-    elseif($(Get-Is-Git))
+    elseif(Get-Is-Git)
     {
-        $versionControlSystem=[VersionControlType]::Git
+        $versionControlSystem=[VersionControlSystem]::Git
     }
 
     return $versionControlSystem
@@ -90,9 +90,9 @@ function Get-Git-Branch
     }
 }
 
-function Get-Branch([VersionControlType]$versionControlType)
+function Get-Branch([VersionControlSystem]$versionControlSystem)
 {
-    switch($versionControlType)
+    switch($versionControlSystem)
     {
         "None" {return ""}
         "Hg"   {return $(Get-HG-Branch)}
@@ -100,33 +100,30 @@ function Get-Branch([VersionControlType]$versionControlType)
     }
 }
 
-function Get-HG-Parent
+function Get-HG-Parent-Rev
 {
     $summary = hg summary
     $parent = $summary[0].Replace("parent: ", "").Trim()
     return $parent
 }
 
-function Get-Git-Parent
+function Get-Git-Parent-Rev
 {
     $head = git rev-parse --short HEAD
 
-    # https://stackoverflow.com/questions/17322876/how-to-tell-if-your-head-is-detached-in-git
-    return $head
-    #TODO
+    # Interesting discussion here: https://stackoverflow.com/questions/17322876/how-to-tell-if-your-head-is-detached-in-git
+    # POSSIBLE TODO: Detached Head indicator (if branch shows ups HEAD, we're detached... but in mercurial it's if the rev doesn't have "tip")
 
-    # $summary = hg summary
-    # $parent = $summary[0].Replace("parent: ", "").Trim()
-    # return $parent
+    return $head
 }
 
-function Get-Parent([VersionControlType]$versionControlType)
+function Get-Parent-Rev([VersionControlSystem]$versionControlSystem)
 {
-    switch($versionControlType)
+    switch($versionControlSystem)
     {
         "None" {return ""}
-        "Hg"   {return $(Get-HG-Parent)}
-        "Git"  {return $(Get-Git-Parent)}
+        "Hg"   {return Get-HG-Parent-Rev}
+        "Git"  {return Get-Git-Parent-Rev}
     }
 }
 
@@ -134,12 +131,37 @@ function Get-Parent([VersionControlType]$versionControlType)
 
 function Get-HG-Num-Changes
 {
-    try {
+    try
+    {
         $status = hg status
         return $status.Count
     }
-    catch {
+    catch
+    {
         return -1
+    }
+}
+
+function Get-Git-Num-Changes
+{
+    try
+    {
+        $status = git status --short
+        return $status.Count
+    }
+    catch
+    {
+        return -1
+    }
+}
+
+function Get-Num-Changes([VersionControlSystem]$versionControlSystem)
+{
+    switch($versionControlSystem)
+    {
+        "None" {return -1}
+        "Hg"   {return Get-HG-Num-Changes}
+        "Git"  {return Get-Git-Num-Changes}
     }
 }
 
@@ -151,7 +173,7 @@ function Show-PromptHG
 
     $title = ""
     $location = Get-Location
-    # switch($versionControlType){
+    # switch($VersionControlSystem){
     #     "None" {$branch = ""; continue}
     #     "Hg" {$branch = $(Get-HG-Branch); continue}
     #     "Git" {$branch = $(Get-Git-Branch); continue}
@@ -194,16 +216,19 @@ function Show-PromptHG
             {
                 Write-Host -NoNewline " "
             }
-            $parent = Get-Parent($versionControlSystem)
+            $parent = Get-Parent-Rev($versionControlSystem)
 
             Write-Host -NoNewline $parent -ForegroundColor $promptConfig.Color.Parent
         }
 
         # Info - Number of Changes
-        $numChanges = $(Get-HG-Num-Changes)
-        if($promptConfig.Show.PromptNumChanges) {
-            if($numChanges -gt 0){
-                if($promptConfig.Show.PromptBranch -or $promptConfig.Show.PromptParent){
+        $numChanges = Get-Num-Changes($versionControlSystem)
+        if($promptConfig.Show.PromptNumChanges)
+        {
+            if($numChanges -gt 0)
+            {
+                if($promptConfig.Show.PromptBranch -or $promptConfig.Show.PromptParent)
+                {
                     Write-Host -NoNewline " "
                 }
                 Write-Host -NoNewline $promptConfig.Symbol.NumChangesStart -ForegroundColor $promptConfig.Color.NumChangesSeparator
@@ -217,14 +242,16 @@ function Show-PromptHG
         Write-Host -NoNewline " "
 
         # Setup Title - Info
-        if ($promptConfig.Show.Title){
+        if ($promptConfig.Show.Title)
+        {
             if($promptConfig.Show.TitleBranch)
             {
                 $title += $branch
             }
             if ($promptConfig.Show.TitleChanges)
             {
-                if($numChanges -gt 0){
+                if($numChanges -gt 0)
+                {
                    $title += $promptConfig.Symbol.TitleChanges
                 }
             }
@@ -232,7 +259,8 @@ function Show-PromptHG
     }
 
     # Setup Title - Location
-    if ($promptConfig.Show.Title -and $promptConfig.Show.TitleLocation) {
+    if ($promptConfig.Show.Title -and $promptConfig.Show.TitleLocation)
+    {
         if(-not $title.Length -eq 0)
         {
             $title += " - "
@@ -244,7 +272,8 @@ function Show-PromptHG
     Write-Host -NoNewline $promptConfig.Symbol.PromptEnd -ForegroundColor $promptConfig.Color.PromptEnd
 
     # Title - Show
-    if ($promptConfig.Show.Title){
+    if ($promptConfig.Show.Title)
+    {
         $host.ui.rawui.WindowTitle = $title
     }
     return " "
