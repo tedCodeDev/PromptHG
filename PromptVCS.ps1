@@ -1,8 +1,8 @@
-# Title: PromptHG
+# Title: PromptVCS.ps1
 # Author: Theodore Mike
-# Description: Displays basic Mercurial info in the PowerShell prompt.
+# Description: Displays basic version control info (Git and Mercurial) in the PowerShell prompt.
 
-# Copyright 2019 Theodore J. Mike
+# Copyright 2020 Theodore J. Mike
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files
 # (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge,
 # publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
@@ -24,7 +24,7 @@
 
 
 # Settings
-$configFileName = "PromptHGConfig.json"
+$configFileName = "PromptVCSConfig.json"
 $configFilePath = $PROFILE.Substring(0, $PROFILE.LastIndexOf("\")) + "\$configFileName"
 $global:promptConfig = Get-Content -Raw -Path $configFilePath | ConvertFrom-Json
 
@@ -52,6 +52,7 @@ function Get-Is-Git
 
 function Get-Version-Control-System{
     [VersionControlSystem]$versionControlSystem=[VersionControlSystem]::None
+
     if(Get-Is-HG)
     {
         $versionControlSystem=[VersionControlSystem]::Hg
@@ -167,7 +168,7 @@ function Get-Num-Changes([VersionControlSystem]$versionControlSystem)
 
 
 
-function Show-PromptHG
+function Show-PromptVCS
 {
     $versionControlSystem = Get-Version-Control-System
 
@@ -282,5 +283,5 @@ function Show-PromptHG
 # Replace the prompt
 function Prompt
 {
-    return Show-PromptHG
+    return Show-PromptVCS
 }

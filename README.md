@@ -1,9 +1,11 @@
-# PromptHG
-## Copyright 2019 Theodore J. Mike
+# PromptVCS
+## Copyright 2020 Theodore J. Mike
 ---
 
 ## Description
-Displays basic Mercurial info in the PowerShell prompt.
+Displays basic version control info in the PowerShell prompt.
+
+Currentlly supported version control systems: Git and Mercurial
 
 For license terms, please see License.md.
 
@@ -12,20 +14,20 @@ For license terms, please see License.md.
 
 ## Installation
 
-To install, add PromptHG.ps1 to your PowerShell profile and place the config file in the same folder as your PowerShell profile.
+To install, add PromptVCS.ps1 to your PowerShell profile and place the config file in the same folder as your PowerShell profile.
 
 **For Example:**
 
-1. Edit: C:\Users\<UserName>\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1 to contain the following: 
-    * . '<PathToScript>\PromptHG.ps1'
+1. Edit: C:\Users\<UserName>\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1 to contain the following:
+    * . '<PathToScript>\PromptVCS.ps1'
 
-2. Copy PromptHGConfig.json to C:\Users\<UserName>\Documents\WindowsPowerShell\
+2. Copy PromptVCSConfig.json to C:\Users\<UserName>\Documents\WindowsPowerShell\
 
 
 ---
 
 ## Configuration
-Several aspects of the prompt can be easily adjusted to meet your individual preferences.  To make these customizations, you may change the values of any of the properties of the copy of PromptHGConfig.json that is in you PowerShell profile folder.
+Several aspects of the prompt can be easily adjusted to meet your individual preferences.  To make these customizations, you may change the values of any of the properties of the copy of PromptVCSConfig.json that is in you PowerShell profile folder.
 
 | Section    | Property            | Description                                                                                               |
 | ---------- | ------------------- | --------------------------------------------------------------------------------------------------------- |
@@ -37,11 +39,11 @@ Several aspects of the prompt can be easily adjusted to meet your individual pre
 |            | PromptPS            | Show "PS" at the beginning of the PowerShell prompt                                                       |
 |            | PromptLocation      | Show the current path in the PowerShell prompt                                                            |
 |            | PromptBranch        | Show the current branch in the PowerShell prompt                                                          |
-|            | PromptParent        | Show the parent branch info in the PowerShell prompt                                                      |
+|            | PromptParent        | Show the parent revision in the PowerShell prompt                                                         |
 |            | PromptNumChanges    | Show the number of uncommitted local changes in the PowerShell prompt                                     |
 | **Symbol** |                     |                                                                                                           |
-|            | HgInfoStart         | The symbol to show in the PowerShell prompt before any Mercurial info                                     |
-|            | HgInfoEnd           | The symbol to show in the PowerShell prompt after any Mercurial info                                      |
+|            | InfoStart           | The symbol to show in the PowerShell prompt before all version control info                               |
+|            | InfoEnd             | The symbol to show in the PowerShell prompt after all version control info                                |
 |            | NumChangesStart     | The symbol to show in the PowerShell before the number of uncommitted local changes                       |
 |            | NumChangesEnd       | The symbol to show in the PowerShell after the number of uncommitted local changes                        |
 |            | PromptEnd           | The symbol to show after the entire PowerShell prompt                                                     |
@@ -49,7 +51,7 @@ Several aspects of the prompt can be easily adjusted to meet your individual pre
 | **Color**  |                     |                                                                                                           |
 |            | PS                  | The color of the "PS" that displays at the beginning of the PowerShell prompt                             |
 |            | Location            | The color of the current path                                                                             |
-|            | HgInfoSeparator     | The color of the symbols that appear immediately before and after the Mercurial info                      |
+|            | InfoSeparator       | The color of the symbols that appear immediately before and after the version control info                |
 |            | Branch              | The color of the current branch                                                                           |
 |            | Parent              | The color of the parent                                                                                   |
 |            | NumChangesSeparator | The color of the symbols that appear immediately before and after the number of uncommitted local changes |
