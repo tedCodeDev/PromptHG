@@ -37,34 +37,7 @@ Add-Type -TypeDefinition @"
     }
 "@
 
-
-function Get-Is-HG
-{
-    $branch = Get-HG-Branch
-    return ((-not $branch.Contains("abort:")) -and (-not $branch -eq ""))
-}
-
-function Get-Is-Git
-{
-    $branch = Get-Git-Branch
-    return ((-not $branch.Contains("fatal:")) -and (-not $branch -eq ""))
-}
-
-function Get-Version-Control-System{
-    [VersionControlSystem]$versionControlSystem=[VersionControlSystem]::None
-
-    if(Get-Is-HG)
-    {
-        $versionControlSystem=[VersionControlSystem]::Hg
-    }
-    elseif(Get-Is-Git)
-    {
-        $versionControlSystem=[VersionControlSystem]::Git
-    }
-
-    return $versionControlSystem
-}
-
+#region Mercurial Version Control Functions
 function Get-HG-Branch
 {
     try
@@ -78,6 +51,29 @@ function Get-HG-Branch
     }
 }
 
+function Get-HG-Parent-Rev
+{
+    $summary = hg summary
+    $parent = $summary[0].Replace("parent: ", "").Trim()
+    return $parent
+}
+
+function Get-HG-Num-Changes
+{
+    try
+    {
+        $status = hg status
+        return $status.Count
+    }
+    catch
+    {
+        return -1
+    }
+}
+
+#endregion
+
+#region Git Version Control Functions
 function Get-Git-Branch
 {
     try
@@ -91,23 +87,6 @@ function Get-Git-Branch
     }
 }
 
-function Get-Branch([VersionControlSystem]$versionControlSystem)
-{
-    switch($versionControlSystem)
-    {
-        "None" {return ""}
-        "Hg"   {return $(Get-HG-Branch)}
-        "Git"  {return $(Get-Git-Branch)}
-    }
-}
-
-function Get-HG-Parent-Rev
-{
-    $summary = hg summary
-    $parent = $summary[0].Replace("parent: ", "").Trim()
-    return $parent
-}
-
 function Get-Git-Parent-Rev
 {
     $head = git rev-parse --short HEAD
@@ -116,31 +95,6 @@ function Get-Git-Parent-Rev
     # POSSIBLE TODO: Detached Head indicator (if branch shows ups HEAD, we're detached... but in mercurial it's if the rev doesn't have "tip")
 
     return $head
-}
-
-function Get-Parent-Rev([VersionControlSystem]$versionControlSystem)
-{
-    switch($versionControlSystem)
-    {
-        "None" {return ""}
-        "Hg"   {return Get-HG-Parent-Rev}
-        "Git"  {return Get-Git-Parent-Rev}
-    }
-}
-
-
-
-function Get-HG-Num-Changes
-{
-    try
-    {
-        $status = hg status
-        return $status.Count
-    }
-    catch
-    {
-        return -1
-    }
 }
 
 function Get-Git-Num-Changes
@@ -156,6 +110,30 @@ function Get-Git-Num-Changes
     }
 }
 
+#endregion
+
+#region Universal Version Control Functions
+
+function Get-Branch([VersionControlSystem]$versionControlSystem)
+{
+    switch($versionControlSystem)
+    {
+        "None" {return ""}
+        "Hg"   {return Get-HG-Branch}
+        "Git"  {return Get-Git-Branch}
+    }
+}
+
+function Get-Parent-Rev([VersionControlSystem]$versionControlSystem)
+{
+    switch($versionControlSystem)
+    {
+        "None" {return ""}
+        "Hg"   {return Get-HG-Parent-Rev}
+        "Git"  {return Get-Git-Parent-Rev}
+    }
+}
+
 function Get-Num-Changes([VersionControlSystem]$versionControlSystem)
 {
     switch($versionControlSystem)
@@ -166,23 +144,41 @@ function Get-Num-Changes([VersionControlSystem]$versionControlSystem)
     }
 }
 
+#endregion
 
+function Get-Is-HG
+{
+    $branch = Get-HG-Branch
+    return ((-not $branch.Contains("abort:")) -and (-not $branch -eq ""))
+}
+
+function Get-Is-Git
+{
+    $branch = Get-Git-Branch
+    return ((-not $branch.Contains("fatal:")) -and (-not $branch -eq ""))
+}
+
+function Get-Version-Control-System{[VersionControlSystem]$versionControlSystem=[VersionControlSystem]::None
+
+    if(Get-Is-HG)
+    {
+        $versionControlSystem=[VersionControlSystem]::Hg
+    }
+    elseif(Get-Is-Git)
+    {
+        $versionControlSystem=[VersionControlSystem]::Git
+    }
+
+    return $versionControlSystem
+}
 
 function Show-PromptVCS
 {
     $versionControlSystem = Get-Version-Control-System
-
     $title = ""
-    $location = Get-Location
-    # switch($VersionControlSystem){
-    #     "None" {$branch = ""; continue}
-    #     "Hg" {$branch = $(Get-HG-Branch); continue}
-    #     "Git" {$branch = $(Get-Git-Branch); continue}
-    # }
-
-    $branch = Get-Branch($versionControlSystem)
-
     $numChanges = 0
+    $location = Get-Location
+    $branch = Get-Branch($versionControlSystem)
 
     # Prompt - Start
     if ($promptConfig.Show.PromptPS)
